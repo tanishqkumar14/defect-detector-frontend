@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import './App.css';
+import tataLogo from './assets/tata.png';
+import upesLogo from './assets/upes.png';
 
 function App() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [preview, setPreview] = useState(null);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile));
     setResult(null);
     setError('');
   };
@@ -16,7 +21,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      setError('Please select a file first.');
+      setError('Please select an image first.');
       return;
     }
 
@@ -26,10 +31,13 @@ function App() {
     formData.append('image', file);
 
     try {
-      const response = await fetch('https://tanishq89-defect-detector-hf.hf.space/predict', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        'https://tanishq89-defect-detector-hf.hf.space/predict',
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Server error. Please try again.');
@@ -46,16 +54,34 @@ function App() {
 
   return (
     <div className="App">
+      <header>
+        <img src={tataLogo} alt="Tata Steel" className="logo" />
+        <img src={upesLogo} alt="UPES" className="logo" />
+      </header>
+
       <h1>Steel Surface Defect Detector</h1>
+      <p className="subtitle">
+        Internship project assigned by Tata Steel during my internship, mentored by Suman Kumari Ma'am.
+      </p>
+
       <form onSubmit={handleSubmit}>
-        <input type="file" onChange={handleFileChange} accept="image/*" />
-        <button type="submit">Submit</button>
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Processing...' : 'Submit'}
+        </button>
       </form>
 
-      {loading && <p>Loading prediction...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {preview && (
+        <div className="image-preview">
+          <h3>Image Preview:</h3>
+          <img src={preview} alt="Preview" />
+        </div>
+      )}
+
+      {error && <p className="error">{error}</p>}
+
       {result && (
-        <div>
+        <div className="result">
           <h3>Prediction Result:</h3>
           <p><strong>Defect:</strong> {result.defect}</p>
           <p><strong>Confidence:</strong> {result.confidence}%</p>
