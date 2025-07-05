@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import './App.css';
 import tataLogo from './assets/tata.png';
-import upesLogo from './assets/upes.png';
 
 function App() {
   const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [preview, setPreview] = useState(null);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -31,16 +30,13 @@ function App() {
     formData.append('image', file);
 
     try {
-      const response = await fetch(
-        'https://tanishq89-defect-detector-hf.hf.space/predict',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const response = await fetch('https://tanishq89-defect-detector-hf.hf.space/predict', {
+        method: 'POST',
+        body: formData
+      });
 
       if (!response.ok) {
-        throw new Error('Server error. Please try again.');
+        throw new Error('Prediction failed. Please try again.');
       }
 
       const data = await response.json();
@@ -54,27 +50,24 @@ function App() {
 
   return (
     <div className="App">
-      <header>
-        <img src={tataLogo} alt="Tata Steel" className="logo" />
-        <img src={upesLogo} alt="UPES" className="logo" />
-      </header>
-
+      <img src={tataLogo} alt="Tata Steel Logo" className="logo" />
       <h1>Steel Surface Defect Detector</h1>
-      <p className="subtitle">
-        Internship project assigned by Tata Steel during my internship, mentored by Suman Kumari Ma'am.
+
+      <p className="subtext">
+        This project was part of an internship assignment by Tata Steel under the mentorship of <strong>Suman Kumari Ma’am</strong>.
       </p>
 
       <form onSubmit={handleSubmit}>
         <input type="file" accept="image/*" onChange={handleFileChange} />
         <button type="submit" disabled={loading}>
-          {loading ? 'Processing...' : 'Submit'}
+          {loading ? 'Analyzing...' : 'Detect Defect'}
         </button>
       </form>
 
       {preview && (
-        <div className="image-preview">
+        <div className="preview">
           <h3>Image Preview:</h3>
-          <img src={preview} alt="Preview" />
+          <img src={preview} alt="Uploaded Preview" />
         </div>
       )}
 
@@ -83,7 +76,7 @@ function App() {
       {result && (
         <div className="result">
           <h3>Prediction Result:</h3>
-          <p><strong>Defect:</strong> {result.defect}</p>
+          <p><strong>Defect Type:</strong> {result.defect}</p>
           <p><strong>Confidence:</strong> {result.confidence}%</p>
         </div>
       )}
