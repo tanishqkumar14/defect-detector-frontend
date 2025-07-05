@@ -4,23 +4,25 @@ import tataLogo from './assets/tata.png';
 
 function App() {
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
     setResult(null);
     setError('');
+    if (selectedFile) {
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      setError('Please select an image first.');
+      setError('Please select a file first.');
       return;
     }
 
@@ -36,7 +38,7 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error('Prediction failed. Please try again.');
+        throw new Error('Server error. Please try again.');
       }
 
       const data = await response.json();
@@ -50,36 +52,46 @@ function App() {
 
   return (
     <div className="App">
-      <img src={tataLogo} alt="Tata Steel Logo" className="logo" />
-      <h1>Steel Surface Defect Detector</h1>
+      <nav className="navbar">
+        <img src={tataLogo} alt="Tata Steel Logo" className="navbar-logo" />
+        <h2 className="navbar-title">Steel Defect Detector</h2>
+      </nav>
 
-      <p className="subtext">
-        This project was part of an internship assignment by Tata Steel under the mentorship of <strong>Suman Kumari Ma’am</strong>.
-      </p>
-
-      <form onSubmit={handleSubmit}>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Analyzing...' : 'Detect Defect'}
-        </button>
-      </form>
-
-      {preview && (
-        <div className="preview">
-          <h3>Image Preview:</h3>
-          <img src={preview} alt="Uploaded Preview" />
+      <div className="content">
+        <div className="header">
+          <h1>Steel Surface Defect Detector</h1>
         </div>
-      )}
 
-      {error && <p className="error">{error}</p>}
-
-      {result && (
-        <div className="result">
-          <h3>Prediction Result:</h3>
-          <p><strong>Defect Type:</strong> {result.defect}</p>
-          <p><strong>Confidence:</strong> {result.confidence}%</p>
+        <div className="project-info">
+          <p><strong>Organization:</strong> Tata Steel Ltd.</p>
+          <p><strong>Department:</strong> SNTI</p>
+          <p><strong>Mentor:</strong> Suman Kumari Ma’am</p>
+          <p><strong>VT ID:</strong> VT20254749</p>
+          <p className="note">This project was part of an internship assignment by Tata Steel under the mentorship of Suman Kumari Ma’am.</p>
         </div>
-      )}
+
+        <form onSubmit={handleSubmit} className="upload-section">
+          <input type="file" onChange={handleFileChange} accept="image/*" />
+          <button type="submit" disabled={loading}>Submit</button>
+        </form>
+
+        {previewUrl && <img src={previewUrl} alt="Preview" className="preview-image" />}
+
+        {loading && <p className="loading">Loading prediction...</p>}
+        {error && <p className="error">{error}</p>}
+
+        {result && (
+          <div className="result">
+            <h3>Prediction Result:</h3>
+            <p><strong>Defect:</strong> {result.defect}</p>
+            <p><strong>Confidence:</strong> {result.confidence}%</p>
+          </div>
+        )}
+      </div>
+
+      <footer className="footer">
+        <p>&copy; 2025 Tata Steel Internship Project | Built by Tanishq Kumar</p>
+      </footer>
     </div>
   );
 }
